@@ -1,7 +1,5 @@
 node_modules
-dist
 dist-electron
-dist-server
 .git
 .gitignore
 *.db

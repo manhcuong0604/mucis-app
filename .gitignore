@@ -4,9 +4,7 @@ node_modules/
 .pnp.js
 
 # Build outputs
-dist/
 dist-electron/
-dist-server/
 
 # Environment & Secret files
 .env

@@ -1,33 +1,7 @@
 # ==========================================================
-# Multi-stage Dockerfile for Mucis Music Player (24/7 Cloud/VPS)
+# Single-stage Dockerfile for Mucis (Local Pre-build Optimized)
 # ==========================================================
-
-# ----------------------------------------------------------
-# Stage 1: Build Frontend (Vite/React) & Server Bundle (Node.js)
-# ----------------------------------------------------------
-FROM node:20-bookworm-slim AS builder
-
-WORKDIR /app
-
-# Cài đặt công cụ biên dịch C++ native module (hỗ trợ better-sqlite3)
-RUN apt-get update && apt-get install -y python3 make g++ build-essential && rm -rf /var/lib/apt/lists/*
-
-# Cài đặt dependencies để build
-COPY package*.json ./
-RUN npm ci
-
-# Copy mã nguồn và build toàn bộ frontend (dist/) & server bundle (dist-server/)
-COPY . .
-ENV NODE_OPTIONS="--max-old-space-size=2048"
-RUN npm rebuild esbuild || true
-RUN npm install --no-save @esbuild/linux-x64 @rollup/rollup-linux-x64-gnu || true
-RUN npx vite build
-RUN npm run build:server || true
-
-# ----------------------------------------------------------
-# Stage 2: Production Runtime (Node.js 20 + Python 3 + FFmpeg)
-# ----------------------------------------------------------
-FROM node:20-bookworm-slim AS runner
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
@@ -48,11 +22,11 @@ RUN pip3 install --no-cache-dir --break-system-packages -r backend/requirements.
 
 # 3. Cài đặt production dependencies cho Node.js (better-sqlite3, bcryptjs, jsonwebtoken, etc.)
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
-# 4. Copy các bản build từ builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/dist-server ./dist-server
+# 4. Copy thư mục frontend (dist/) & server bundle (dist-server/) đã build sẵn từ local
+COPY dist ./dist
+COPY dist-server ./dist-server
 
 # 5. Copy mã nguồn Python backend microservice & server
 COPY backend ./backend
