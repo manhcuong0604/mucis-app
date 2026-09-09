@@ -19,6 +19,8 @@ RUN npm ci
 # Copy mã nguồn và build toàn bộ frontend (dist/) & server bundle (dist-server/)
 COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN npm rebuild esbuild || true
+RUN npm install --no-save @esbuild/linux-x64 @rollup/rollup-linux-x64-gnu || true
 RUN npx vite build
 RUN npm run build:server || true
 
