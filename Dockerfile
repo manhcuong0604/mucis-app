@@ -18,7 +18,9 @@ RUN npm ci
 
 # Copy mã nguồn và build toàn bộ frontend (dist/) & server bundle (dist-server/)
 COPY . .
-RUN npm run build
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN npx vite build
+RUN npm run build:server || true
 
 # ----------------------------------------------------------
 # Stage 2: Production Runtime (Node.js 20 + Python 3 + FFmpeg)
