@@ -1,0 +1,31 @@
+services:
+  mucis-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mucis-app
+    restart: always
+    ports:
+      # Truy cập trực tiếp qua cổng 80 (HTTP tiêu chuẩn) hoặc cổng 3000
+      - "80:3000"
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DB_PATH=/app/data/music_player.db
+      - JWT_SECRET=mucis_production_jwt_secret_change_me_if_needed_2026
+    volumes:
+      # Volume mount thư mục data để lưu database SQLite vĩnh viễn (không bị mất khi rebuild container)
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
