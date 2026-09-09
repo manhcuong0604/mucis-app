@@ -5,12 +5,12 @@
 # ----------------------------------------------------------
 # Stage 1: Build Frontend (Vite/React) & Server Bundle (Node.js)
 # ----------------------------------------------------------
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Cài đặt công cụ biên dịch phụ trợ trên môi trường Alpine
-RUN apk add --no-cache python3 make g++
+# Cài đặt công cụ biên dịch C++ native module (hỗ trợ better-sqlite3)
+RUN apt-get update && apt-get install -y python3 make g++ build-essential && rm -rf /var/lib/apt/lists/*
 
 # Cài đặt dependencies để build
 COPY package*.json ./
